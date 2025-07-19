@@ -1,0 +1,47 @@
+name: Build FreeBSD World
+
+on: [push, workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Compile FreeBSD world
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y qemu-utils debootstrap bsdextrautils
+
+      - name: Clone FreeBSD source
+        run: |
+          git clone https://git.freebsd.org/src.git --depth=1 --branch releng/14.1 freebsd-src
+
+      - name: Set up build environment
+        run: |
+          mkdir -p /etc
+          echo "Copying config..."
+          cp src.conf /etc/src.conf
+          cp make.conf /etc/make.conf
+
+      - name: Build world & kernel
+        run: |
+          cd freebsd-src
+          make -j$(nproc) buildworld
+          make -j$(nproc) buildkernel
+
+      - name: Package result
+        run: |
+          cd /usr/obj
+          tar czf freebsd-build.tar.gz *
+          mkdir -p $HOME/artifacts
+          mv freebsd-build.tar.gz $HOME/artifacts/
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: freebsd-build
+          path: ~/artifacts/freebsd-build.tar.gz
