@@ -14,7 +14,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y qemu-utils debootstrap bsdextrautils
+          sudo apt install -y qemu-utils debootstrap bsdextrautils bmake
 
       - name: Clone FreeBSD source
         run: |
@@ -23,8 +23,8 @@ jobs:
       - name: Build world & kernel
         run: |
           cd freebsd-src
-          make -j$(nproc) SRC_ENV_CONF=${GITHUB_WORKSPACE}/src.conf __MAKE_CONF=${GITHUB_WORKSPACE}/make.conf buildworld
-          make -j$(nproc) SRC_ENV_CONF=${GITHUB_WORKSPACE}/src.conf __MAKE_CONF=${GITHUB_WORKSPACE}/make.conf buildkernel
+          bmake -j$(nproc) SRC_ENV_CONF=${GITHUB_WORKSPACE}/src.conf __MAKE_CONF=${GITHUB_WORKSPACE}/make.conf buildworld
+          bmake -j$(nproc) SRC_ENV_CONF=${GITHUB_WORKSPACE}/src.conf __MAKE_CONF=${GITHUB_WORKSPACE}/make.conf buildkernel
 
 
       - name: Package result
