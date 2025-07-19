@@ -20,18 +20,17 @@ jobs:
         run: |
           git clone https://git.freebsd.org/src.git --depth=1 --branch releng/14.1 freebsd-src
 
-      - name: Set up build environment
-        run: |
-          mkdir -p /etc
-          echo "Copying config..."
-          cp src.conf /etc/src.conf
-          cp make.conf /etc/make.conf
-
       - name: Build world & kernel
         run: |
           cd freebsd-src
-          make -j$(nproc) buildworld
-          make -j$(nproc) buildkernel
+          make -j$(nproc) \
+          SRC_ENV_CONF=${GITHUB_WORKSPACE}/src.conf \
+          __MAKE_CONF=${GITHUB_WORKSPACE}/make.conf \
+          buildworld
+          make -j$(nproc) \
+          SRC_ENV_CONF=${GITHUB_WORKSPACE}/src.conf \
+          __MAKE_CONF=${GITHUB_WORKSPACE}/make.conf \
+          buildkernel
 
       - name: Package result
         run: |
