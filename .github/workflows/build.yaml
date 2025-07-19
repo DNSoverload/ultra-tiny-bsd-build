@@ -23,14 +23,9 @@ jobs:
       - name: Build world & kernel
         run: |
           cd freebsd-src
-          make -j$(nproc) \
-          SRC_ENV_CONF=${GITHUB_WORKSPACE}/src.conf \
-          __MAKE_CONF=${GITHUB_WORKSPACE}/make.conf \
-          buildworld
-          make -j$(nproc) \
-          SRC_ENV_CONF=${GITHUB_WORKSPACE}/src.conf \
-          __MAKE_CONF=${GITHUB_WORKSPACE}/make.conf \
-          buildkernel
+          make -j$(nproc) SRC_ENV_CONF=${GITHUB_WORKSPACE}/src.conf __MAKE_CONF=${GITHUB_WORKSPACE}/make.conf buildworld
+          make -j$(nproc) SRC_ENV_CONF=${GITHUB_WORKSPACE}/src.conf __MAKE_CONF=${GITHUB_WORKSPACE}/make.conf buildkernel
+
 
       - name: Package result
         run: |
