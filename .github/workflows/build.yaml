@@ -8,31 +8,40 @@ jobs:
     name: Compile FreeBSD world
 
     steps:
-      - name: Checkout code
+      - name: Checkout code (this repo)
         uses: actions/checkout@v4
 
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y qemu-utils debootstrap bsdextrautils bmake
+          sudo apt install -y \
+            debootstrap bsdextrautils clang lld libarchive-dev libbz2-dev libelf-dev \
+            zlib1g-dev libssl-dev python3 bmake git xz-utils flex byacc time
 
-      - name: Clone FreeBSD source
+      - name: Cache FreeBSD source
+        id: cache-freebsd
+        uses: actions/cache@v4
+        with:
+          path: freebsd-src
+          key: freebsd-src-releng-14.1-${{ hashFiles('freebsd-src/.git/HEAD') }}
+          restore-keys: |
+            freebsd-src-releng-14.1-
+
+      - name: Clone FreeBSD (if cache miss)
+        if: steps.cache-freebsd.outputs.cache-hit != 'true'
         run: |
-          git clone https://git.freebsd.org/src.git --depth=1 --branch releng/14.1 freebsd-src
+          git clone --depth=1 --branch releng/14.1 https://git.freebsd.org/src.git freebsd-src
 
-      - name: Build world & kernel
+      - name: Build world
         run: |
           cd freebsd-src
-          bmake -j$(nproc) SRC_ENV_CONF=${GITHUB_WORKSPACE}/src.conf __MAKE_CONF=${GITHUB_WORKSPACE}/make.conf buildworld
-          bmake -j$(nproc) SRC_ENV_CONF=${GITHUB_WORKSPACE}/src.conf __MAKE_CONF=${GITHUB_WORKSPACE}/make.conf buildkernel
-
+          MAKEOBJDIRPREFIX=$PWD/../obj ./tools/build/make.py -j$(nproc) \
+            TARGET=amd64 TARGET_ARCH=amd64 buildworld
 
       - name: Package result
         run: |
-          cd /usr/obj
-          tar czf freebsd-build.tar.gz *
           mkdir -p $HOME/artifacts
-          mv freebsd-build.tar.gz $HOME/artifacts/
+          tar czf $HOME/artifacts/freebsd-build.tar.gz -C obj .
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
