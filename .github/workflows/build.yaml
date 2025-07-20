@@ -36,7 +36,9 @@ jobs:
         run: |
           mkdir -p obj
           cd freebsd-src
-          MAKEOBJDIRPREFIX=$PWD/../obj ./tools/build/make.py -j$(nproc) \
+          MAKEOBJDIRPREFIX=$PWD/../obj ./tools/build/make.py \
+          --cross-bindir=/usr/bin \
+          -j$(nproc) \  
             TARGET=amd64 TARGET_ARCH=amd64 buildworld
 
       - name: Package result
