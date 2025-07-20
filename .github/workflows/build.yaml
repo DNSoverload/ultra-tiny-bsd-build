@@ -34,7 +34,7 @@ jobs:
 
       - name: Build world
         run: |
-          mkdir -p obj
+          mkdir -p /tmp/obj
           cd freebsd-src
           MAKEOBJDIRPREFIX=/tmp/obj ./tools/build/make.py --cross-bindir=/usr/bin -j$(nproc) TARGET=amd64 TARGET_ARCH=amd64   buildworld
 
