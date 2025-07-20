@@ -31,7 +31,9 @@ jobs:
         if: steps.cache-freebsd.outputs.cache-hit != 'true'
         run: |
           git clone --depth=1 --branch releng/14.1 https://git.freebsd.org/src.git freebsd-src
-
+      - name: Create symlink for clang-cpp
+        run: |
+            sudo ln -s /usr/bin/clang /usr/bin/clang-cpp
       - name: Build world
         run: |
           mkdir -p /tmp/obj
