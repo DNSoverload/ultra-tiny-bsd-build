@@ -38,15 +38,21 @@ jobs:
         run: |
           mkdir -p /tmp/obj
           cd freebsd-src
-          MAKEOBJDIRPREFIX=/tmp/obj ./tools/build/make.py --cross-bindir=/usr/bin -j$(nproc) TARGET=amd64 TARGET_ARCH=amd64   buildworld
-
+          MAKEOBJDIRPREFIX=/tmp/obj ./tools/build/make.py __MAKE_CONF=$GITHUB_WORKSPACE/make.conf SRCONF=$GITHUB_WORKSPACE/src.conf --cross-bindir=/usr/bin -j$(nproc) TARGET=amd64 TARGET_ARCH=amd64 buildworld >> build.log 2>&1
+      
       - name: Package result
         run: |
           mkdir -p $HOME/artifacts
           tar czf $HOME/artifacts/freebsd-build.tar.gz -C obj .
 
-      - name: Upload artifact
+      - name: Upload The Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: freebsd-build
           path: ~/artifacts/freebsd-build.tar.gz
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: freebsd-build-log
+          path: freebsd-src/build.log
